@@ -16,9 +16,9 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Fetch user details from the database
+// Fetch user details from the database, including first name, last name, and role
 $query = $con->prepare("
-    SELECT u.username, u.user_type, hs.firstname, hs.lastname, hs.Staff_Role, hs.Hospital, hs.Region, hs.Phone, hs.Email
+    SELECT u.username, u.user_type, hs.firstname, hs.lastname, hs.Staff_Role
     FROM user u
     LEFT JOIN hospital_staff hs ON u.user_id = hs.User_ID
     WHERE u.user_id = ?
@@ -34,10 +34,6 @@ if ($result->num_rows > 0) {
     $firstname = $user['firstname'];
     $lastname = $user['lastname'];
     $role = $user['Staff_Role'];
-    $hospital = $user['Hospital'];
-    $region = $user['Region'];
-    $phone = $user['Phone'];
-    $email = $user['Email'];
 } else {
     // If user is not found, redirect to login page
     header('Location: login.php');
@@ -49,11 +45,9 @@ $con->close();
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
   <title>Health-Connect</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
@@ -77,13 +71,11 @@ $con->close();
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
+
 </head>
-
 <body>
-
   <!-- ======= Header ======= -->
   <header id="header" class="header fixed-top d-flex align-items-center">
-
     <div class="d-flex align-items-center justify-content-between">
       <a href="hospital_dashboard.php" class="logo d-flex align-items-center">
         <img src="assets/img/OIG2.jfif" alt="">
@@ -94,9 +86,9 @@ $con->close();
 
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
-
         <li class="nav-item dropdown pe-3">
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+            <!--<img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">-->
             <span class="d-none d-md-block dropdown-toggle ps-2"><?php echo htmlspecialchars($firstname . ' ' . $lastname); ?></span>
           </a><!-- End Profile Image Icon -->
 
@@ -124,15 +116,13 @@ $con->close();
                 <span>Sign Out</span>
               </a>
             </li>
-
           </ul><!-- End Profile Dropdown Items -->
         </li><!-- End Profile Nav -->
-
       </ul>
     </nav><!-- End Icons Navigation -->
-
   </header><!-- End Header -->
-  
+
+  <!-- ======= Sidebar ======= -->
   <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
       <li class="nav-item">
@@ -140,33 +130,36 @@ $con->close();
           <i class="bi bi-grid"></i>
           <span>Dashboard</span>
         </a>
-      </li>
+      </li><!-- End Dashboard Nav -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="add_donor.php">
           <i class="bi bi-person-add"></i>
           <span>Add Donor</span>
         </a>
-      </li>
+      </li><!-- End Medical Records Page Nav -->
+
       <li class="nav-item">
         <a class="nav-link collapsed" href="#">
           <i class="bx bxs-donate-blood"></i>
           <span>Blood Request</span>
         </a>
-      </li>
+      </li><!-- End Blood Transfusion Request Page Nav -->
+     
       <li class="nav-item">
         <a class="nav-link collapsed" href="blood_bag.php">
           <i class="bi bi-bag"></i>
           <span>View Blood Bag</span>
         </a>
-      </li>
+      </li><!-- End Blood Transfusion Request Page Nav -->
+
       <li class="nav-item">
         <a class="nav-link collapsed" href="view_donors.php">
           <i class="bi bi-people"></i>
           <span>View Donors</span>
         </a>
-      </li>
+      </li><!-- End Donors Page Nav -->
     </ul>
-  </aside><!-- End Sidebar-->
+  </aside><!-- End Sidebar -->
 
   <main id="main" class="main">
     <div class="pagetitle">
@@ -182,8 +175,10 @@ $con->close();
     <section class="section profile">
       <div class="row">
         <div class="col-xl-4">
+
           <div class="card">
             <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+
               <h2><?php echo htmlspecialchars($firstname . ' ' . $lastname); ?></h2>
               <h3><?php echo htmlspecialchars($role); ?></h3>
               <div class="social-links mt-2">
@@ -194,97 +189,125 @@ $con->close();
               </div>
             </div>
           </div>
+
         </div>
 
         <div class="col-xl-8">
+
           <div class="card">
             <div class="card-body pt-3">
               <!-- Bordered Tabs -->
               <ul class="nav nav-tabs nav-tabs-bordered">
+
                 <li class="nav-item">
                   <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">Overview</button>
                 </li>
+
                 <li class="nav-item">
                   <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Edit Profile</button>
                 </li>
+
                 <li class="nav-item">
                   <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Change Password</button>
                 </li>
+
               </ul>
               <div class="tab-content pt-2">
+
                 <div class="tab-pane fade show active profile-overview" id="profile-overview">
                   <h5 class="card-title">Profile Details</h5>
+
                   <div class="row">
-                    <div class="col-lg-3 col-md-4 label">Full Name</div>
+                    <div class="col-lg-3 col-md-4 label ">Full Name</div>
                     <div class="col-lg-9 col-md-8"><?php echo htmlspecialchars($firstname . ' ' . $lastname); ?></div>
                   </div>
+
                   <div class="row">
                     <div class="col-lg-3 col-md-4 label">Hospital</div>
-                    <div class="col-lg-9 col-md-8"><?php echo htmlspecialchars($hospital); ?></div>
+                    <div class="col-lg-9 col-md-8">Mount Meru</div>
                   </div>
+
                   <div class="row">
                     <div class="col-lg-3 col-md-4 label">Region</div>
-                    <div class="col-lg-9 col-md-8"><?php echo htmlspecialchars($region); ?></div>
+                    <div class="col-lg-9 col-md-8">Arusha</div>
                   </div>
+
                   <div class="row">
                     <div class="col-lg-3 col-md-4 label">Phone</div>
-                    <div class="col-lg-9 col-md-8"><?php echo htmlspecialchars($phone); ?></div>
+                    <div class="col-lg-9 col-md-8"></div>
                   </div>
+
                   <div class="row">
                     <div class="col-lg-3 col-md-4 label">Email</div>
-                    <div class="col-lg-9 col-md-8"><?php echo htmlspecialchars($email); ?></div>
+                    <div class="col-lg-9 col-md-8"></div>
                   </div>
+
                 </div>
 
                 <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+
                   <!-- Profile Edit Form -->
-                  <form action="update_profile.php" method="post">
+                  <form>
                     <div class="row mb-3">
-                      <label for="firstname" class="col-md-4 col-lg-3 col-form-label">First Name</label>
+                      <label for="fullName" class="col-md-4 col-lg-3 col-form-label">Full Name</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="firstname" type="text" class="form-control" id="firstname" value="<?php echo htmlspecialchars($firstname); ?>">
+                        <input name="fullName" type="text" class="form-control" id="fullName">
                       </div>
                     </div>
 
                     <div class="row mb-3">
-                      <label for="lastname" class="col-md-4 col-lg-3 col-form-label">Last Name</label>
+                      <label for="company" class="col-md-4 col-lg-3 col-form-label">Company</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="lastname" type="text" class="form-control" id="lastname" value="<?php echo htmlspecialchars($lastname); ?>">
+                        <input name="company" type="text" class="form-control" id="company">
                       </div>
                     </div>
 
                     <div class="row mb-3">
-                      <label for="role" class="col-md-4 col-lg-3 col-form-label">Role</label>
+                      <label for="Country" class="col-md-4 col-lg-3 col-form-label">Region</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="role" type="text" class="form-control" id="role" value="<?php echo htmlspecialchars($role); ?>">
+                        <input name="country" type="text" class="form-control" id="Country">
                       </div>
                     </div>
 
                     <div class="row mb-3">
-                      <label for="hospital" class="col-md-4 col-lg-3 col-form-label">Hospital</label>
+                      <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Phone</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="hospital" type="text" class="form-control" id="hospital" value="<?php echo htmlspecialchars($hospital); ?>">
+                        <input name="phone" type="text" class="form-control" id="Phone">
                       </div>
                     </div>
 
                     <div class="row mb-3">
-                      <label for="region" class="col-md-4 col-lg-3 col-form-label">Region</label>
+                      <label for="Email" class="col-md-4 col-lg-3 col-form-label">Email</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="region" type="text" class="form-control" id="region" value="<?php echo htmlspecialchars($region); ?>">
+                        <input name="email" type="email" class="form-control" id="Email" value="k.anderson@example.com">
                       </div>
                     </div>
 
                     <div class="row mb-3">
-                      <label for="phone" class="col-md-4 col-lg-3 col-form-label">Phone</label>
+                      <label for="Twitter" class="col-md-4 col-lg-3 col-form-label">Twitter Profile</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="phone" type="text" class="form-control" id="phone" value="<?php echo htmlspecialchars($phone); ?>">
+                        <input name="twitter" type="text" class="form-control" id="Twitter" value="https://twitter.com/#">
                       </div>
                     </div>
 
                     <div class="row mb-3">
-                      <label for="email" class="col-md-4 col-lg-3 col-form-label">Email</label>
+                      <label for="Facebook" class="col-md-4 col-lg-3 col-form-label">Facebook Profile</label>
                       <div class="col-md-8 col-lg-9">
-                        <input name="email" type="email" class="form-control" id="email" value="<?php echo htmlspecialchars($email); ?>">
+                        <input name="facebook" type="text" class="form-control" id="Facebook" value="https://facebook.com/#">
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="Instagram" class="col-md-4 col-lg-3 col-form-label">Instagram Profile</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="instagram" type="text" class="form-control" id="Instagram" value="https://instagram.com/#">
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="Linkedin" class="col-md-4 col-lg-3 col-form-label">Linkedin Profile</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="linkedin" type="text" class="form-control" id="Linkedin" value="https://linkedin.com/#">
                       </div>
                     </div>
 
@@ -292,59 +315,65 @@ $con->close();
                       <button type="submit" class="btn btn-primary">Save Changes</button>
                     </div>
                   </form><!-- End Profile Edit Form -->
+
                 </div>
 
                 <div class="tab-pane fade pt-3" id="profile-change-password">
                   <!-- Change Password Form -->
-                  <form action="change_password.php" method="post">
-                    <div class="row mb-3">
-                      <label for="current_password" class="col-md-4 col-lg-3 col-form-label">Current Password</label>
-                      <div class="col-md-8 col-lg-9">
-                        <input name="current_password" type="password" class="form-control" id="current_password">
-                      </div>
-                    </div>
+                      <form action="change_password.php" method="post">
 
-                    <div class="row mb-3">
-                      <label for="new_password" class="col-md-4 col-lg-3 col-form-label">New Password</label>
-                      <div class="col-md-8 col-lg-9">
-                        <input name="new_password" type="password" class="form-control" id="new_password">
+                      <div class="row mb-3">
+                        <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Current Password</label>
+                        <div class="col-md-8 col-lg-9">
+                          <input name="currentPassword" type="password" class="form-control" id="currentPassword" required>
+                        </div>
                       </div>
-                    </div>
 
-                    <div class="row mb-3">
-                      <label for="confirm_password" class="col-md-4 col-lg-3 col-form-label">Confirm Password</label>
-                      <div class="col-md-8 col-lg-9">
-                        <input name="confirm_password" type="password" class="form-control" id="confirm_password">
+                      <div class="row mb-3">
+                        <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">New Password</label>
+                        <div class="col-md-8 col-lg-9">
+                          <input name="newPassword" type="password" class="form-control" id="newPassword" required>
+                        </div>
                       </div>
-                    </div>
 
-                    <div class="text-center">
-                      <button type="submit" class="btn btn-primary">Change Password</button>
-                    </div>
-                  </form><!-- End Change Password Form -->
+                      <div class="row mb-3">
+                        <label for="renewPassword" class="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
+                        <div class="col-md-8 col-lg-9">
+                          <input name="renewPassword" type="password" class="form-control" id="renewPassword" required>
+                        </div>
+                      </div>
+
+                      <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                      </div>
+                      </form><!-- End Change Password Form -->
+
                 </div>
+
               </div><!-- End Bordered Tabs -->
-            </div>
+
+           
           </div>
-        </div>
+        </div><!-- End Left side columns -->
       </div>
     </section>
   </main><!-- End #main -->
 
+  <!-- ======= Footer ======= -->
   <footer id="footer" class="footer">
     <div class="copyright">
       &copy; Copyright <strong><span>Health-Connect</span></strong>. All Rights Reserved
     </div>
     <div class="credits">
-      Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      Designed by <strong>Taylor</strong>
     </div>
   </footer><!-- End Footer -->
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
   <!-- Vendor JS Files -->
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/chart.js/chart.umd.js"></script>
   <script src="assets/vendor/echarts/echarts.min.js"></script>
   <script src="assets/vendor/quill/quill.min.js"></script>
@@ -354,7 +383,5 @@ $con->close();
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
-
 </body>
-
 </html>
