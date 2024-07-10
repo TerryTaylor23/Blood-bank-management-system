@@ -103,7 +103,7 @@ $query->close();
               <hr class="dropdown-divider">
             </li>
             <li>
-              <a class="dropdown-item d-flex align-items-center" href="profile.html">
+              <a class="dropdown-item d-flex align-items-center" href="donor_profile.php">
                 <i class="bi bi-person"></i>
                 <span>My Profile</span>
               </a>

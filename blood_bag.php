@@ -211,7 +211,8 @@ $con->close();
     echo "</div>";
 
     echo "<div class='container mt-4'>";
-    echo "<a href='add_blood_bag.php' class='btn btn-primary'>Add Blood Bag</a>";
+    echo "<a href='add_blood_bag.php' class='btn btn-primary'>Add Blood Bag</a></br></br>";
+    echo "<a href='view_requests.php' class='btn btn-primary'>View Request</a>";
     echo "</div>";
     $conn->close();
     ?>
