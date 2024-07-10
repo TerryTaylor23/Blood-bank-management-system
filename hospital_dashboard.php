@@ -16,6 +16,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
+
 // Fetch user details from the database, including first name, last name, and role
 $query = $con->prepare("
     SELECT u.username, u.user_type, hs.firstname, hs.lastname, hs.Staff_Role
@@ -139,7 +140,7 @@ $con->close();
       </li><!-- End Medical Records Page Nav -->
 
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#">
+        <a class="nav-link collapsed" href="request.php">
           <i class="bx bxs-donate-blood"></i>
           <span>Blood Request</span>
         </a>

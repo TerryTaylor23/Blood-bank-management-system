@@ -1,97 +1,98 @@
 <?php
-include('server.php');
-
-// Start session to access session variables
 session_start();
 
-// Retrieve form data
+// Database connection
+$con = new mysqli("localhost", "root", "", "blood_bank");
+
+if ($con->connect_error) {
+    die("Connection failed: " . $con->connect_error);
+}
+
+// Check if user_id is set in session
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['error_message'] = 'User ID not found. Please log in again.';
+    header('Location: login.php');
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+// Fetch hospital_id using user_id from hospital_staff table
+$query = "
+    SELECT hs.hospital_id
+    FROM user u
+    JOIN hospital_staff hs ON u.user_id = hs.User_ID
+    WHERE u.user_id = ?
+";
+$stmt = $con->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $hospitalId = $row['hospital_id'];
+} else {
+    $_SESSION['error_message'] = 'Hospital not found for the user.';
+    header('Location: login.php');
+    exit();
+}
+
+// Get form data
 $bloodType = $_POST['bloodType'];
 $rhFactor = $_POST['rhFactor'];
-$quantity = $_POST['quantity'];
+$quantityNeeded = $_POST['quantity'];
 $requestDate = $_POST['requestDate'];
 
-function getAvailableBloodBags($conn, $bloodType, $quantity) {
-    $stmt = $conn->prepare("SELECT * FROM blood_bag WHERE Blood_Type = ? AND Status = 'Available' LIMIT ?");
-    $stmt->bind_param("si", $bloodType, $quantity);
+// Check availability
+$query = "
+    SELECT bag_id
+    FROM blood_bag
+    WHERE Blood_Type = ? AND Rh_Factor = ? AND Status = 'Available'
+    LIMIT ?
+";
+$stmt = $con->prepare($query);
+$stmt->bind_param("ssi", $bloodType, $rhFactor, $quantityNeeded);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows >= $quantityNeeded) {
+    // Update the database to reserve the blood bags
+    $query = "
+        UPDATE blood_bag
+        SET Status = 'Reserved'
+        WHERE bag_id IN (
+            SELECT bag_id
+            FROM (
+                SELECT bag_id
+                FROM blood_bag
+                WHERE Blood_Type = ? AND Rh_Factor = ? AND Status = 'Available'
+                LIMIT ?
+            ) as subquery
+        )
+    ";
+    $stmt = $con->prepare($query);
+    $stmt->bind_param("ssi", $bloodType, $rhFactor, $quantityNeeded);
     $stmt->execute();
-    $result = $stmt->get_result();
-    $bags = $result->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-    return $bags;
-}
 
-function updateBloodBagStatus($conn, $bagId, $status) {
-    $stmt = $conn->prepare("UPDATE blood_bag SET Status = ? WHERE Bag_ID = ?");
-    $stmt->bind_param("si", $status, $bagId);
+    // Insert the request into the blood_request table
+    $query = "
+        INSERT INTO blood_request (Hospital_ID, Blood_Type, Rh_Factor, Quantity, Request_Date, Request_Status_ID)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ";
+    $requestStatusId = 1;  // Assuming 1 means 'Pending' or similar
+    $stmt = $con->prepare($query);
+    $stmt->bind_param("issisi", $hospitalId, $bloodType, $rhFactor, $quantityNeeded, $requestDate, $requestStatusId);
     $stmt->execute();
-    $stmt->close();
-}
 
-function insertBloodRequest($conn, $bloodType, $rhFactor, $quantity, $requestDate) {
-    $stmt = $conn->prepare("INSERT INTO blood_request (Blood_Type, Rh_Factor, Quantity, Request_Date, Request_Status_ID) VALUES (?, ?, ?, ?, ?)");
-    $requestStatusId = 1; // Assuming 1 is the ID for 'Pending' status
-    $stmt->bind_param("ssisi", $bloodType, $rhFactor, $quantity, $requestDate, $requestStatusId);
-    $stmt->execute();
-    $stmt->close();
-}
-
-function isValidExpiry($expiryDate) {
-    $currentDate = date("Y-m-d");
-    return $expiryDate > $currentDate;
-}
-
-function isCompatible($requested, $available) {
-    $compatibleBloodTypes = [
-        'A+' => ['A+', 'A-', 'O+', 'O-'],
-        'A-' => ['A-', 'O-'],
-        'B+' => ['B+', 'B-', 'O+', 'O-'],
-        'B-' => ['B-', 'O-'],
-        'AB+' => ['AB+', 'AB-', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-'],
-        'AB-' => ['AB-', 'A-', 'B-', 'O-'],
-        'O+' => ['O+', 'O-'],
-        'O-' => ['O-']
-    ];
-    
-    $requestedType = $requested['type'] . $requested['factor'];
-    $availableType = $available['type'] . $available['factor'];
-
-    return in_array($availableType, $compatibleBloodTypes[$requestedType]);
-}
-
-// Retrieve available blood bags
-$availableBags = getAvailableBloodBags($conn, $bloodType, $quantity);
-$requestSent = false;
-
-foreach ($availableBags as $bag) {
-    if (!isValidExpiry($bag['Expiry_Date'])) {
-        continue; // Skip if the bag has expired
-    }
-    
-    if (isCompatible(['type' => $bloodType, 'factor' => $rhFactor], ['type' => $bag['Blood_Type'], 'factor' => $bag['Rh_Factor']])) {
-        // Mark the bag as reserved
-        updateBloodBagStatus($conn, $bag['Bag_ID'], 'Reserved');
-        
-        // Insert the request into the blood_request table
-        insertBloodRequest($conn, $bloodType, $rhFactor, $quantity, $requestDate);
-        
-        $requestSent = true;
-        break; // Stop after reserving the first compatible bag
-    }
-}
-
-$conn->close();
-
-if ($requestSent) {
-    // Set success message in the session
-    $_SESSION['success_message'] = "Request sent successfully!";
-    
-    // Redirect to the request page
-    header('Location: request.php');
-    exit();
+    $_SESSION['success_message'] = 'Blood request processed successfully.';
 } else {
-    // Handle the case where no compatible blood bags were found
-    $_SESSION['error_message'] = "No compatible blood bags found!";
-    header('Location: request.php');
-    exit();
+    $_SESSION['error_message'] = 'Insufficient blood available for the requested type and Rh factor.';
 }
+
+$stmt->close();
+$con->close();
+
+header('Location: request.php');
+exit();
 ?>

@@ -129,9 +129,9 @@ $query->close();
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link collapsed" href="#">
+            <a class="nav-link collapsed" href="request.php">
                 <i class="bx bxs-donate-blood"></i>
-                <span>Blood transfusion Request</span>
+                <span>Blood Request</span>
             </a>
         </li>
         <li class="nav-item">
