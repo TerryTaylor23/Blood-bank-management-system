@@ -117,7 +117,7 @@ $query->close();
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link collapsed" href="medical_records.php">
+        <a class="nav-link collapsed" href="view_medical_records.php">
           <i class="bi bi-book"></i>
           <span>Medical Records</span>
         </a>
