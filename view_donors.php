@@ -164,59 +164,56 @@ $con->close();
   
   <main id="main" class="main">
   <div class="container mt-4">
-        <h2>Available Donors</h2>
-        <table class="table table-bordered table-striped mt-3">
-            <thead>
-                <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Blood Type</th>
-                    <th>Rhesus Factor</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php include('fetch_donors.php'); ?>
-            </tbody>
-        </table>
-    </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    <script>
-        function deleteDonor(donorId) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.post('delete_donor.php', { id: donorId }, function(response) {
-                        if (response.success) {
-                            Swal.fire(
-                                'Deleted!',
-                                'The donor has been deleted.',
-                                'success'
-                            ).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire(
-                                'Error!',
-                                'There was an issue deleting the donor.',
-                                'error'
-                            );
-                        }
-                    }, 'json');
-                }
-            });
-        }
-    </script>
-
+    <h2>Available Donors</h2>
+    <table class="table table-bordered table-striped mt-3">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Blood Type</th>
+                <th>Rhesus Factor</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php include('fetch_donors.php'); ?>
+        </tbody>
+    </table>
+</div>
+<script>
+    function deleteDonor(donorId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('delete_donor.php', { id: donorId }, function(response) {
+                    if (response.success) {
+                        Swal.fire(
+                            'Deleted!',
+                            'The donor has been deleted.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'There was an issue deleting the donor.',
+                            'error'
+                        );
+                    }
+                }, 'json');
+            }
+        });
+    }
+</script>
 
 
 

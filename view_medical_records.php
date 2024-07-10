@@ -32,21 +32,6 @@ if ($result->num_rows > 0) {
     exit();
 }
 
-// Fetch the next donation date if the user is a donor
-$next_donation_date = '';
-if ($user_type === 'donor') {
-    $donor_query = $con->prepare("SELECT last_donation_date FROM donor WHERE Donor_ID = ?");
-    $donor_query->bind_param("i", $user_id);
-    $donor_query->execute();
-    $donor_result = $donor_query->get_result();
-    if ($donor_result->num_rows == 1) {
-        $donor_data = $donor_result->fetch_assoc();
-        $last_donation_date = $donor_data["last_donation_date"];
-        $next_donation_date = date('Y-m-d', strtotime($last_donation_date . ' + 56 days'));
-    }
-    $donor_query->close();
-}
-
 $query->close();
 ?>
 
@@ -132,7 +117,7 @@ $query->close();
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link collapsed" href="">
+        <a class="nav-link collapsed" href="medical_records.php">
           <i class="bi bi-book"></i>
           <span>Medical Records</span>
         </a>
@@ -149,36 +134,46 @@ $query->close();
 
   <main id="main" class="main">
     <?php
-    include("server.php");
-
-    // Use the session user ID as the donor ID
+    // Fetch the donor's medical records
     $donorId = $user_id;
 
     if ($donorId !== null) {
-        // Query to fetch medical records for the donor
         $sql = "SELECT * FROM medical_records WHERE Donor_ID = ?";
-        
-        // Prepare and bind the statement
         $stmt = $con->prepare($sql);
-        $stmt->bind_param("i", $donorId); // "i" indicates the variable type is integer
-        
-        // Execute the statement
+        $stmt->bind_param("i", $donorId);
         $stmt->execute();
-        
-        // Get result
         $result = $stmt->get_result();
-        $medicalHistory = $result->fetch_all(MYSQLI_ASSOC);
-        
-        // Close the statement
+        $medicalRecords = $result->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
-        
-        // Display the medical records
-        if (!empty($medicalHistory)) {
+
+        if (!empty($medicalRecords)) {
             echo "<h2>Medical Records</h2>";
-            foreach ($medicalHistory as $record) {
-                echo "<p>Last Updated: ". $record['Last_Update']. "</p>";
-                echo "<p>Medical History: ". nl2br($record['Medical_History']). "</p>";
+            echo "<table class='table table-bordered'>";
+            echo "<thead>";
+            echo "<tr>";
+            echo "<th>Record ID</th>";
+            echo "<th>Medical History</th>";
+            echo "<th>Height</th>";
+            echo "<th>Weight</th>";
+            echo "<th>Age</th>";
+            echo "<th>Last Update</th>";
+            echo "</tr>";
+            echo "</thead>";
+            echo "<tbody>";
+
+            foreach ($medicalRecords as $record) {
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($record['Record_ID']) . "</td>";
+                echo "<td>" . nl2br(htmlspecialchars($record['Medical_History'])) . "</td>";
+                echo "<td>" . htmlspecialchars($record['Height']) . "</td>";
+                echo "<td>" . htmlspecialchars($record['Weight']) . "</td>";
+                echo "<td>" . htmlspecialchars($record['Age']) . "</td>";
+                echo "<td>" . htmlspecialchars($record['Last_Update']) . "</td>";
+                echo "</tr>";
             }
+
+            echo "</tbody>";
+            echo "</table>";
         } else {
             echo "<p>No medical records found.</p>";
         }
@@ -186,7 +181,6 @@ $query->close();
         echo "<p>Please provide a valid donor ID.</p>";
     }
 
-    // Close the database connection
     $con->close();
     ?>
   </main>
