@@ -89,7 +89,6 @@ $con->close();
       <ul class="d-flex align-items-center">
         <li class="nav-item dropdown pe-3">
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-            <!--<img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">-->
             <span class="d-none d-md-block dropdown-toggle ps-2"><?php echo htmlspecialchars($firstname . ' ' . $lastname); ?></span>
           </a><!-- End Profile Image Icon -->
 
@@ -161,7 +160,6 @@ $con->close();
     </ul>
   </aside><!-- End Sidebar -->
 
-  
   <main id="main" class="main">
   <div class="container mt-4">
     <h2>Available Donors</h2>
@@ -181,47 +179,41 @@ $con->close();
         </tbody>
     </table>
 </div>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script>
-    function deleteDonor(donorId) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.post('delete_donor.php', { id: donorId }, function(response) {
-                    if (response.success) {
-                        Swal.fire(
-                            'Deleted!',
-                            'The donor has been deleted.',
-                            'success'
-                        ).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire(
-                            'Error!',
-                            'There was an issue deleting the donor.',
-                            'error'
-                        );
-                    }
-                }, 'json');
-            }
-        });
-    }
+function deleteDonor(donorId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('delete_donor.php', { id: donorId }, function(response) {
+                response = JSON.parse(response);
+                if (response.success) {
+                    Swal.fire(
+                        'Deleted!',
+                        'The donor has been deleted.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        'There was an issue deleting the donor.',
+                        'error'
+                    );
+                }
+            });
+        }
+    });
+}
 </script>
-
-
-
-
-
-
-
-
   </main><!-- End #main -->
 
   <!-- Footer -->

@@ -18,9 +18,17 @@ $user_id = $_SESSION['user_id'];
 
 // Fetch user details from the database
 $query = $con->prepare("SELECT username, user_type FROM user WHERE user_id = ?");
-$query->bind_param("i", $user_id);  
-$query->execute();
+if ($query === false) {
+    die("MySQL prepare statement error: " . $con->error);
+}
+$query->bind_param("i", $user_id);
+if (!$query->execute()) {
+    die("MySQL execute statement error: " . $query->error);
+}
 $result = $query->get_result();
+if ($result === false) {
+    die("MySQL get result error: " . $query->error);
+}
 
 if ($result->num_rows > 0) {
     $user = $result->fetch_assoc();
@@ -33,6 +41,11 @@ if ($result->num_rows > 0) {
 }
 
 $query->close();
+
+// Ensure the user is a donor
+if ($user_type !== 'donor') {
+    die("Access denied: You do not have permission to view this page.");
+}
 ?>
 
 <!DOCTYPE html>
@@ -140,9 +153,17 @@ $query->close();
     if ($donorId !== null) {
         $sql = "SELECT * FROM medical_records WHERE Donor_ID = ?";
         $stmt = $con->prepare($sql);
+        if ($stmt === false) {
+            die("MySQL prepare statement error: " . $con->error);
+        }
         $stmt->bind_param("i", $donorId);
-        $stmt->execute();
+        if (!$stmt->execute()) {
+            die("MySQL execute statement error: " . $stmt->error);
+        }
         $result = $stmt->get_result();
+        if ($result === false) {
+            die("MySQL get result error: " . $stmt->error);
+        }
         $medicalRecords = $result->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
 
@@ -175,7 +196,7 @@ $query->close();
             echo "</tbody>";
             echo "</table>";
         } else {
-            echo "<p>No medical records found.</p>";
+            echo "<p>No medical records found. <a href='add_medical_record.php'>Add your medical records now</a>.</p>";
         }
     } else {
         echo "<p>Please provide a valid donor ID.</p>";
@@ -184,6 +205,7 @@ $query->close();
     $con->close();
     ?>
   </main>
+
 
   <footer id="footer" class="footer">
     <div class="copyright">
