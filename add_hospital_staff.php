@@ -197,13 +197,6 @@ $con->close();
         </a>
       </li>
 
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="donor.php">
-          <i class="bi bi-people"></i>
-          <span>Users</span>
-        </a>
-      </li><!-- End Contact Page Nav -->
-
     </ul>
 
   </aside><!-- End Sidebar-->

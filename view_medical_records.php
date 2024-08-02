@@ -207,6 +207,7 @@ if ($user_type !== 'donor') {
   </main>
 
 
+
   <footer id="footer" class="footer">
     <div class="copyright">
       &copy; Copyright <strong><span>Health-Connect</span></strong>. All Rights Reserved

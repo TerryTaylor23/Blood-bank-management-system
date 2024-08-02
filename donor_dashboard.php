@@ -240,7 +240,7 @@ $con->close();
           </div>
           <div class="ps-3">
             <h6></h6>
-            <span class="text-success small pt-1 fw-bold"></span> <span class="text-muted small pt-2 ps-1"></span>
+            <span class="text-success small pt-1 fw-bold"></span> <span class="text-muted small pt-2 ps-1">Check eligibility</span>
           </div>
         </div>
       </div>
